@@ -4,29 +4,111 @@ import struct
 from os import getenv
 import argparse
 from typing import *
+from dataclasses import dataclass
+from enum import Enum
+from datetime import datetime, timezone
 
 STRUCT_FORMAT: str = "32s d 16s I 12s I"
 BLOCK_SIZE: int = struct.calcsize(STRUCT_FORMAT)
 
-SAVE_FILE_PATH: str = getenv("BCHOC_FILE_PATH")
+class BlockState(Enum):
+    INITIAL: int    = 0
+    CHECKEDIN: int  = 1
+    CHECKEDOUT: int = 2
+    DISPOSED: int   = 3
+    DESTROYED: int  = 4
+    RELEASED: int   = 5
+    NOSTATE: int    = 6
 
+
+@dataclass
+class BlockData:
+    previousHash: str = "\x00"*32
+    timestamp: float = 0.0
+    caseID: str = "\x00"*16
+    evidenceID: int = 0
+    state: BlockState = BlockState.NOSTATE
+    dataLength: int = 0
+    data: str = ""
+
+
+class Block:
+    def __init__(self, data: BlockData = None):
+        self.data: BlockData = data if (data is not None) else BlockData
+        self.next: Block = None
+
+
+listHead: Block = None
 
 def doAdd(args: argparse.Namespace):
-    pass
+    itemSet: Set[int] = set(args.itemIDs)
+    if (len(itemSet) < len(args.itemIDs)):
+        print("Duplicate input ID")
+        exit(-1)
+
+    prevBlock: Block = None
+    currBlock: Block = listHead
+    while (currBlock is not None):
+        currID: int = currBlock.data.itemID
+        if (currID in itemSet):
+            print("Duplicate input ID")
+            exit(-1)
+        
+        prevBlock = currBlock
+        currBlock = currBlock.next
+    
+    for newBlockID in args.itemsIDs:
+        newBlockData: BlockData = BlockData()
+
+        newBlockData.state = BlockData.CHECKEDIN
+        newBlockData.caseID = args.caseID
+        newBlockData.itemID = newBlockID
+
+
+    
+
 
 def doCheckout(args: argparse.Namespace):
     pass
 
+
+def doCheckin(args: argparse.Namespace):
+    pass
+
+
 def doLog(args: argparse.Namespace):
     pass
+
 
 def doRemove(args: argparse.Namespace):
     pass
 
+
 def doInit(args: argparse.Namespace):
-    pass
+    saveFilePath: str = getenv("BCHOC_FILE_PATH")
+    if (saveFilePath is not None): 
+        print("Blockchain file found with INITIAL block.")
+        return loadChainFromFile(saveFilePath)
+    
+    initialData: BlockData = BlockData()
+    initialData.previousHash = ""
+    initialData.timestamp = datetime.now(timezone.utc).timestamp()
+    initialData.caseID = ""
+    initialData.evidenceID = 0
+    initialData.state = BlockState.INITIAL
+    initialData.dataLength = 14
+    initialData.data = "Initial block\x00"
+
+    listHead: Block = Block(initialData)
+
+    print("Blockchain file not found. Created INITIAL block.")
+
 
 def doVerify(args: argparse.Namespace):
+    pass
+
+
+def loadChainFromFile(filePath):
     pass
 
 
