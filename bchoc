@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+
+import struct
+from os import getenv
+import argparse
+from typing import *
+
+STRUCT_FORMAT: str = "32s d 16s I 12s I"
+BLOCK_SIZE: int = struct.calcsize(STRUCT_FORMAT)
+
+SAVE_FILE_PATH: str = getenv("BCHOC_FILE_PATH")
+
+
+def doAdd(args: argparse.Namespace):
+    pass
+
+def doCheckout(args: argparse.Namespace):
+    pass
+
+def doLog(args: argparse.Namespace):
+    pass
+
+def doRemove(args: argparse.Namespace):
+    pass
+
+def doInit(args: argparse.Namespace):
+    pass
+
+def doVerify(args: argparse.Namespace):
+    pass
+
+
+def main() -> None:
+    modes: List[str] = ["add", "checkout", "checkin", "log", "remove", "init", "verify"]
+
+    argumentParser: argparse.ArgumentParser = argparse.ArgumentParser()
+    subparsers = argumentParser.add_subparsers(dest="mode")
+
+    modeParsers: Dict[str, Any] = {
+        mode: subparsers.add_parser(mode) for mode in modes
+    }
+
+    modeParsers["add"].add_argument("-c", "--case_id", dest="caseID", type=str, required=True)
+    modeParsers["add"].add_argument("-i", "--item_id", dest="itemIDs", type=int, required=True, action="append")
+
+    modeParsers["checkout"].add_argument("-i", "--item_id", dest="itemID", type=int, required=True)
+
+    modeParsers["checkin"].add_argument("-i", "--item_id", dest="itemID", type=int, required=True)
+
+    modeParsers["log"].add_argument("-r", "--reversed", dest="reversed", action="store_true")
+    modeParsers["log"].add_argument("-n", "--num_entries", dest="numEntries", type=int)
+    modeParsers["log"].add_argument("-c", "--case_id", dest="caseID", type=str)
+    modeParsers["log"].add_argument("-i", "--item_id", dest="itemID", type=int)
+    
+    modeParsers["remove"].add_argument("-i", "--item_id", dest="itemID", type=int, required=True)
+    modeParsers["remove"].add_argument("-y", "--reason", dest="reason", type=str, required=True)
+    modeParsers["remove"].add_argument("-o", "--owner", dest="owner", type=str)
+
+    args: argparse.Namespace = argumentParser.parse_args()
+
+    modeFunctionName: str = f"do{args.mode.capitalize()}"
+    globalVals: Dict[str, Any] = globals()
+    if (modeFunctionName not in globalVals):
+        print(f'Function "{modeFunctionName}" not implemented')
+        exit(-1)
+    
+    globalVals[modeFunctionName](args)
+
+
+if __name__ == '__main__':
+    main()
