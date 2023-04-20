@@ -1,79 +1,100 @@
 #!/usr/bin/env python3
 
-import struct
 from os import getenv
 import argparse
 from typing import *
-from dataclasses import dataclass
-from enum import Enum
 from datetime import datetime, timezone
-
-STRUCT_FORMAT: str = "32s d 16s I 12s I"
-BLOCK_SIZE: int = struct.calcsize(STRUCT_FORMAT)
-
-class BlockState(Enum):
-    INITIAL: int    = 0
-    CHECKEDIN: int  = 1
-    CHECKEDOUT: int = 2
-    DISPOSED: int   = 3
-    DESTROYED: int  = 4
-    RELEASED: int   = 5
-    NOSTATE: int    = 6
-
-
-@dataclass
-class BlockData:
-    previousHash: str = "\x00"*32
-    timestamp: float = 0.0
-    caseID: str = "\x00"*16
-    evidenceID: int = 0
-    state: BlockState = BlockState.NOSTATE
-    dataLength: int = 0
-    data: str = ""
-
-
-class Block:
-    def __init__(self, data: BlockData = None):
-        self.data: BlockData = data if (data is not None) else BlockData
-        self.next: Block = None
-
-
-listHead: Block = None
+from blockchain import Blockchain
 
 def doAdd(args: argparse.Namespace):
-    itemSet: Set[int] = set(args.itemIDs)
-    if (len(itemSet) < len(args.itemIDs)):
-        print("Duplicate input ID")
-        exit(-1)
+    bchain = Blockchain()
 
-    prevBlock: Block = None
-    currBlock: Block = listHead
-    while (currBlock is not None):
-        currID: int = currBlock.data.itemID
-        if (currID in itemSet):
-            print("Duplicate input ID")
+    for id in args.itemIDs:
+        if bchain.get_block(id) != None:
+            print("Error: Evidence ID {} not unique.".format(id))
             exit(-1)
-        
-        prevBlock = currBlock
-        currBlock = currBlock.next
-    
-    for newBlockID in args.itemsIDs:
-        newBlockData: BlockData = BlockData()
 
-        newBlockData.state = BlockData.CHECKEDIN
-        newBlockData.caseID = args.caseID
-        newBlockData.itemID = newBlockID
+    caseID = args.caseID
+    print("Case: {}".format(caseID))
+    for id in args.itemIDs:
+        bchain.write_block(caseID, id, "CHECKEDIN", "")
 
-
-    
-
+        print("Added item: {}".format(id))
+        print("  Status: CHECKEDIN")
+        print("  Time of action: {}".format(datetime.now()))
 
 def doCheckout(args: argparse.Namespace):
-    pass
+    bchain = Blockchain()
+
+    id = args.itemID
+    block = bchain.get_block(id)
+    if block is not None:
+        state = block['state']
+    else:
+        print("Error: Evidence item {} does not exist. Please add it.".format(id))
+        exit(-1)
+
+    if state == "INITIAL":
+        print("Error: Evidence item {} is not a valid item.".format(id))
+        exit(-1)
+    elif state == "CHECKEDOUT":
+        print("Error: Evidence item {} is already checked out. Must check it in first.".format(id))
+        exit(-1)
+    elif state == "DISPOSED":
+        print("Error: Evidence item {} has been disposed. Cannot check it out.".format(id))
+        exit(-1)
+    elif state == "DESTROYED":
+        print("Error: Evidence item {} has been destroyed. Cannot check it out.".format(id))
+        exit(-1)
+    elif state == "RELEASED":
+        print("Error: Evidence item {} has been released. Cannot check it out.".format(id))
+        exit(-1)
+
+    # Checkout item
+    case = block['case_id']
+    bchain.write_block(case, id, "CHECKOUT", "")
+
+    print("Case: {}".format(case))
+    print("Checked out item: {}".format(id))
+    print("  Status: CHECKEDOUT")
+    print("  Time of action: {}".format(datetime.now()))
 
 
 def doCheckin(args: argparse.Namespace):
-    pass
+    bchain = Blockchain()
+
+    id = args.itemId
+    block = bchain.get_block(id)
+    if block is not None:
+        state = block['state']
+    else:
+        print("Error: Evidence item {} does not exist. Please add it.".format(id))
+        exit(-1)
+
+    if state == "INITIAL":
+        print("Error: Evidence item {} is not a valid item.".format(id))
+        exit(-1)
+    elif state == "CHECKEDIN":
+        print("Error: Evidence item {} is already checked in. Must check it out first.".format(id))
+        exit(-1)
+    elif state == "DISPOSED":
+        print("Error: Evidence item {} is disposed. Cannot check it in.".format(id))
+        exit(-1)
+    elif state == "DESTROYED":
+        print("Error: Evidence item {} is destroyed. Cannot check it in.".format(id))
+        exit(-1)
+    elif state == "RELEASED":
+        print("Error: Evidence item {} is released. Cannot check it in.".format(id))
+        exit(-1)
+
+    # Check in item
+    case = block['case_id']
+    bchain.write_block(case, id, "CHECKIN", "")
+    
+    print("Case: {}".format(case))
+    print("Checked in item: {}".format(id))
+    print("  Status: CHECKEDIN")
+    print("  Time of action: {}".format(datetime.now()))
 
 
 def doLog(args: argparse.Namespace):
@@ -81,28 +102,65 @@ def doLog(args: argparse.Namespace):
 
 
 def doRemove(args: argparse.Namespace):
-    pass
+    bchain = Blockchain()
+
+    id = args.itemID
+    block = bchain.get_block(id)
+    if block is not None:
+        state = block['state']
+    else:
+        print("Error: Evidence item {} does not exist. Please add it.".format(id))
+        exit(-1)
+
+    if state != "CHECKEDIN":
+        print("Error: Evidence item {} must be checked in to remove it. Please check it in.".format(id))
+        exit(-1)
+
+    reason = args.reason
+    owner = args.owner # What happens if this is not given? None?
+    if reason == "RELEASED" and owner == None:
+        print("Error: Must give a reason in order to release.")
+        exit(-1)
+    elif reason == "DISPOSED" and owner != None:
+        print("Error: Disposed evidence does not need an owner.")
+        exit(-1)
+    elif reason == "DESTROYED" and owner != None:
+        print("Error: Destroyed evidence does not need an owner.")
+        exit(-1)
+
+    # Remove evidence
+    case = block['case_id']
+    if reason == "RELEASED":
+        bchain.write_block(case, id, "RELEASED", reason)
+
+        print("Case: {}".format(case))
+        print("Released item: {}".format(id))
+        print("  Status: RELEASED")
+        print("  Time of action: {}".format(datetime.now()))
+    elif reason == "DISPOSED":
+        bchain.write_block(case, id, "DISPOSED", "")
+
+        print("Case: {}".format(case))
+        print("Disposed of item: {}".format(id))
+        print("  Status: DISPOSED")
+        print("  Time of action: {}".format(datetime.now()))
+    elif reason == "DESTROYED":
+        bchain.write_block(case, id, "DESTROYED", "")
+
+        print("Case: {}".format(case))
+        print("Destroyed item: {}".format(id))
+        print("  Status: DESTROYED")
+        print("  Time of action: {}".format(datetime.now()))
 
 
 def doInit(args: argparse.Namespace):
-    saveFilePath: str = getenv("BCHOC_FILE_PATH")
-    if (saveFilePath is not None): 
-        print("Blockchain file found with INITIAL block.")
-        return loadChainFromFile(saveFilePath)
-    
-    initialData: BlockData = BlockData()
-    initialData.previousHash = ""
-    initialData.timestamp = datetime.now(timezone.utc).timestamp()
-    initialData.caseID = ""
-    initialData.evidenceID = 0
-    initialData.state = BlockState.INITIAL
-    initialData.dataLength = 14
-    initialData.data = "Initial block\x00"
+    bchain = Blockchain()
 
-    listHead: Block = Block(initialData)
-
-    print("Blockchain file not found. Created INITIAL block.")
-
+    if bchain.check_init():
+        print("Blockchain found with initial file.")
+    else:
+        bchain.__init__()
+        print("Blockchain file not found. Created INITIAL block.")
 
 def doVerify(args: argparse.Namespace):
     pass

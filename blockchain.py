@@ -25,7 +25,7 @@ class Blockchain:
 
     # For Testing
     # PUT YOUR OWN PATH!!
-    BCH_PATH = "C:\Projects\CSE469 Project\chain.dat"
+    BCH_PATH = "/home/nicholas/Repos/CSE469/chain.dat"
 
     def __get_last_hash(self):
         """
@@ -145,13 +145,13 @@ class Blockchain:
                 block['data'] = file.read(block['data_length']).decode()[:-1]
                 res.append(block)
 
-    def get_last_state(self, item_id):
+    def get_block(self, item_id):
         """
-        Returns a string representing the last state of an item, or None in case the item wasn't previously added.
+        Returns a a dictionary representation of the block, or None in case the item wasn't previously added.
         """
         for block in reversed(self.read_blocks()):
             if block['item_id'] == item_id:
-                return block['state']
+                return block
         return None
     
     def verify_chain(self):
