@@ -53,7 +53,6 @@ class Blockchain:
         # state = "{:<12}".format(State.INITIAL.value).encode()
         state = State.INITIAL.value.ljust(12, "\x00").encode()
         data = "Initial block"
-        data += "\0"
         data_length = len(data)
         data = data.encode()
         d = struct.pack(self.BLOCK_FORMAT, previous_block, timestamp, case_id, item_id, state, data_length)
@@ -97,7 +96,6 @@ class Blockchain:
         else:
             case_id = case_id.bytes
         state = state.ljust(12, "\x00").encode()
-        data += "\0"
         data_length = len(data)
         data = data.encode()
         d = struct.pack(self.BLOCK_FORMAT, previous_block, timestamp, case_id, item_id, state, data_length)
@@ -145,7 +143,7 @@ class Blockchain:
                         "state": state,
                         "data_length": l[5]
                     }
-                block['data'] = file.read(block['data_length']).decode()[:-1]
+                block['data'] = file.read(block['data_length']).decode()
                 res.append(block)
 
     def get_block(self, item_id):
