@@ -46,10 +46,12 @@ class Blockchain:
         Writes the initial block when the new file is created.
         """
         previous_block = bytearray([0] * 32)
-        timestamp = datetime.now(timezone.utc).timestamp()
+        # timestamp = datetime.now(timezone.utc).timestamp()
+        timestamp = 0
         case_id = bytearray([0] * 16)
         item_id = 0
-        state = "{:<12}".format(State.INITIAL.value).encode()
+        # state = "{:<12}".format(State.INITIAL.value).encode()
+        state = State.INITIAL.value.ljust(12, "\x00").encode()
         data = "Initial block"
         data += "\0"
         data_length = len(data)
@@ -71,7 +73,7 @@ class Blockchain:
             if not data:
                 return False
             l = list(struct.unpack(self.BLOCK_FORMAT, data))
-            state = l[4].decode().rstrip()
+            state = l[4].decode().rstrip("\x00")
             return state == State.INITIAL.value
     
     def write_block(
@@ -92,8 +94,7 @@ class Blockchain:
         previous_block = self.last_hash
         timestamp = datetime.now(timezone.utc).timestamp()
         case_id = case_id.bytes
-        state = "{:<12}".format(state)
-        state = state.encode()
+        state = state.ljust(12, "\x00").encode()
         data += "\0"
         data_length = len(data)
         data = data.encode()
@@ -123,7 +124,7 @@ class Blockchain:
                 if not data:
                     return res
                 l = list(struct.unpack(self.BLOCK_FORMAT, data))
-                state = l[4].decode().rstrip()
+                state = l[4].decode().rstrip("\x00")
                 if state == State.INITIAL.value:
                     block = {
                         "previous_block": None,
@@ -187,7 +188,7 @@ class Blockchain:
                     parent_dict[parent_hash] = current_hash
                 # Check for item traversal
                 item_id = block[3]
-                state = block[4].decode().rstrip()
+                state = block[4].decode().rstrip("\x00")
                 if state in {State.DISPOSED.value, State.RELEASED.value, State.DESTROYED.value}:
                     removed_items.append(item_id)
                 elif (state in {State.CHECKED_IN.value, State.CHECKED_OUT.value}) and item_id in removed_items:
@@ -207,12 +208,6 @@ class Blockchain:
 # A simple main method that creates a chain with one item and performs some basic operations on it.
 if __name__ == "__main__":
     bchain = Blockchain()
-    bchain.write_block(
-        case_id="e1de5cac-7162-4854-8a19-d8db2bcf641b",
-        item_id=1,
-        state="CHECKEDIN",
-        data="Description of the item."
-    )
     for block in bchain.read_blocks():
         print(block)
     print(bchain.verify_chain())
