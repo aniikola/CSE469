@@ -20,7 +20,7 @@ class Blockchain:
 
     BLOCK_FORMAT = "=32sd16sI12sI"
     BLOCK_LENGTH = 76
-    LE = sys.byteorder == "little"
+    LE = sys.byteorder != "little"
 
     if "BCHOC_FILE_PATH" in os.environ:
         BCH_PATH = os.environ.get("BCHOC_FILE_PATH")
