@@ -53,6 +53,7 @@ class Blockchain:
         # state = "{:<12}".format(State.INITIAL.value).encode()
         state = State.INITIAL.value.ljust(12, "\x00").encode()
         data = "Initial block"
+        data += "\x00"
         data_length = len(data)
         data = data.encode()
         d = struct.pack(self.BLOCK_FORMAT, previous_block, timestamp, case_id, item_id, state, data_length)
