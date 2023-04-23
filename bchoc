@@ -157,14 +157,10 @@ def doRemove(args: argparse.Namespace):
 def doInit(args: argparse.Namespace):
     bchain = Blockchain()
 
-    try:
-        if bchain.check_init():
-            print("Blockchain found with initial file.")
-        else:
-            bchain.__init__()
-            print("Blockchain file not found. Created INITIAL block.")
-    except Exception as e:
-        print(e.args)
+    if bchain.check_init():
+        print("Blockchain found with a valid initial file.")
+    else:
+        print("The blockchain file provided is invalid.")
         exit(-1)
 
 def doVerify(args: argparse.Namespace):
