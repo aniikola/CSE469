@@ -70,8 +70,8 @@ class Blockchain:
         if not os.path.isfile(self.BCH_PATH): return False
         with open(self.BCH_PATH, "rb") as file:
             data = file.read(self.BLOCK_LENGTH)
-            if not data:
-                return False
+            if not data or len(data) != 76:
+                raise Exception("Invalid file provided.")
             l = list(struct.unpack(self.BLOCK_FORMAT, data))
             state = l[4].decode().rstrip("\x00")
             return state == State.INITIAL.value
