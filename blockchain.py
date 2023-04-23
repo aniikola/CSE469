@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import hashlib
 from uuid import UUID
 from enum import Enum
+import sys
 
 class State(Enum):
     INITIAL = "INITIAL"
@@ -19,6 +20,7 @@ class Blockchain:
 
     BLOCK_FORMAT = "=32sd16sI12sI"
     BLOCK_LENGTH = 76
+    LE = sys.byteorder == "little"
 
     if "BCHOC_FILE_PATH" in os.environ:
         BCH_PATH = os.environ.get("BCHOC_FILE_PATH")
@@ -91,7 +93,10 @@ class Blockchain:
         """
         previous_block = self.last_hash
         timestamp = datetime.now(timezone.utc).timestamp()
-        case_id = case_id.bytes
+        if self.LE:
+            case_id = case_id.bytes_le
+        else:
+            case_id = case_id.bytes
         state = state.ljust(12, "\x00").encode()
         data += "\0"
         data_length = len(data)
@@ -136,7 +141,7 @@ class Blockchain:
                     block = {
                         "previous_block": l[0].hex(),
                         "timestamp": datetime.fromtimestamp(l[1]),
-                        "case_id": UUID(bytes=l[2]),
+                        "case_id": UUID(bytes_le=l[2]) if self.LE else UUID(bytes=l[2]),
                         "item_id": l[3],
                         "state": state,
                         "data_length": l[5]
