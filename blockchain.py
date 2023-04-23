@@ -20,12 +20,10 @@ class Blockchain:
     BLOCK_FORMAT = "=32sd16sI12sI"
     BLOCK_LENGTH = 76
 
-    # For Grading
-    # bch_path = os.environ.get("BCHOC_FILE_PATH")
-
-    # For Testing
-    # PUT YOUR OWN PATH!!
-    BCH_PATH = "C:\Projects\CSE469 Project\CSE469\chain.dat"
+    if "BCHOC_FILE_PATH" in os.environ:
+        BCH_PATH = os.environ.get("BCHOC_FILE_PATH")
+    else:
+        BCH_PATH = "C:\Projects\CSE469 Project\CSE469\chain.dat"
 
     def __get_last_hash(self):
         """
