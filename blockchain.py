@@ -25,7 +25,7 @@ class Blockchain:
     if "BCHOC_FILE_PATH" in os.environ:
         BCH_PATH = os.environ.get("BCHOC_FILE_PATH")
     else:
-        BCH_PATH = "C:\Projects\CSE469 Project\CSE469\chain.dat"
+        BCH_PATH = "/home/nicholas/Repos/CSE469/chain.dat"
 
     def __get_last_hash(self):
         """
@@ -196,7 +196,44 @@ class Blockchain:
                     err = "IMPROPER REMOVAL", current_hash
                 previous_hash = current_hash
 
-        
+    def verify_remove_is_final(self):
+        """
+        Loops through the entire blockchain, keeping track of all items that have been removed. If an item that has been removed appears again, return False.
+        Otherwise, return True.
+        """
+        blocks = self.read_blocks()
+        removed = []
+    
+        for block in blocks:
+            if block['item_id'] in removed:
+                return False
+
+            if block['status'] == "DISPOSED" or block['status'] == "DESTROYED" or block['status'] == "RELEASED":
+                removed.append(block['item_id'])
+
+        return True
+
+
+    def verify_add_is_first(self):
+        """
+        Loops through the entire blockchain, checking every new item. If every new item has the status 'CHECKEDIN', then continue. If a new item has any other status, return False.
+        Once the end of the chain has been reached with no returns, return True.
+        """
+        blocks = self.read_blocks()
+        items = []
+
+        # Remove the INITIAL block from the list
+        blocks.pop(0)
+
+        for block in blocks:
+            if block['item_id'] not in items:
+                if block['status'] is not 'CHECKEDIN':
+                    return False
+                else:
+                    items.append(block['item_id'])
+
+        return True
+
     def __init__(self):
         """
         Creates the INITIAL block and updates the last hash.
