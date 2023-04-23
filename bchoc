@@ -63,7 +63,7 @@ def doCheckout(args: argparse.Namespace):
 def doCheckin(args: argparse.Namespace):
     bchain = Blockchain()
 
-    id = args.itemId
+    id = args.itemID
     block = bchain.get_block(id)
     if block is not None:
         state = block['state']
@@ -89,7 +89,7 @@ def doCheckin(args: argparse.Namespace):
 
     # Check in item
     case = block['case_id']
-    bchain.write_block(case, id, "CHECKIN", "")
+    bchain.write_block(case, id, "CHECKEDIN", "")
     
     print("Case: {}".format(case))
     print("Checked in item: {}".format(id))
@@ -111,7 +111,7 @@ def doRemove(args: argparse.Namespace):
     else:
         print("Error: Evidence item {} does not exist. Please add it.".format(id))
         exit(-1)
-
+    
     if state != "CHECKEDIN":
         print("Error: Evidence item {} must be checked in to remove it. Please check it in.".format(id))
         exit(-1)

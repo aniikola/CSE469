@@ -25,7 +25,7 @@ class Blockchain:
 
     # For Testing
     # PUT YOUR OWN PATH!!
-    BCH_PATH = "/home/nicholas/Repos/CSE469/chain.dat"
+    BCH_PATH = "C:\Projects\CSE469 Project\CSE469\chain.dat"
 
     def __get_last_hash(self):
         """
@@ -91,7 +91,7 @@ class Blockchain:
         """
         previous_block = self.last_hash
         timestamp = datetime.now(timezone.utc).timestamp()
-        case_id = UUID(case_id).bytes
+        case_id = case_id.bytes
         state = "{:<12}".format(state)
         state = state.encode()
         data += "\0"
