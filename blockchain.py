@@ -67,11 +67,10 @@ class Blockchain:
         Checks for the INITIAL block.
         :return: True on existing.
         """
-        if not os.path.isfile(self.BCH_PATH): return False
         with open(self.BCH_PATH, "rb") as file:
             data = file.read(self.BLOCK_LENGTH)
             if not data or len(data) != 76:
-                raise Exception("Invalid file provided.")
+                return False
             l = list(struct.unpack(self.BLOCK_FORMAT, data))
             state = l[4].decode().rstrip("\x00")
             return state == State.INITIAL.value
@@ -203,9 +202,9 @@ class Blockchain:
         """
         Creates the INITIAL block and updates the last hash.
         """
-        if not self.check_init():
+        if not os.path.isfile(self.BCH_PATH):
             self.__write_initial_block()
-        else:
+        elif self.check_init():
             self.last_hash = self.__get_last_hash()
 
 # A simple main method that creates a chain with one item and performs some basic operations on it.
