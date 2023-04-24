@@ -167,7 +167,9 @@ def doInit(args: argparse.Namespace):
         exit(-1)
 
 def doVerify(args: argparse.Namespace):
-    pass
+    bchain = Blockchain()
+
+    bchain.verify_chain()
 
 
 def loadChainFromFile(filePath):
