@@ -128,6 +128,9 @@ def doRemove(args: argparse.Namespace):
     elif reason == "DESTROYED" and owner != None:
         print("Error: Destroyed evidence does not need an owner.")
         exit(-1)
+    else:
+        print("Error: Not a valid reason to remove an item.")
+        exit(-1)
 
     # Remove evidence
     case = block['case_id']
