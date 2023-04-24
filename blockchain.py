@@ -196,6 +196,9 @@ class Blockchain:
 
 
     def verify_chain(self):
+        if not self.verify_valid():
+            print("Error: block is not valid")
+            exit(-1)
         if not self.verify_remove_is_final():
             print("Error: item changed after removal")
             exit(-1)
@@ -214,6 +217,15 @@ class Blockchain:
         if not self.verify_duplicate_parents():
             print("Error: item has duplicate parents")
             exit(-1)
+
+
+    def verify_valid(self):
+        try:
+            blocks = self.read_blocks()
+        except Exception:
+            return False
+
+        return True
         
 
     def verify_remove_is_final(self):
