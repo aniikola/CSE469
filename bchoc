@@ -97,9 +97,30 @@ def doCheckin(args: argparse.Namespace):
     print("  Status: CHECKEDIN")
     print("  Time of action: {}".format(datetime.now()))
 
+def print_blocks(blocks):
+    for block in blocks:
+        print(f"Case: {block['case_id']}")
+        print(f"Item: {block['item_id']}")
+        print(f"Action: {block['state']}")
+        print(f"Time: {block['timestamp']}")
+
 
 def doLog(args: argparse.Namespace):
-    pass
+    bchain = Blockchain()
+
+    is_reversed = args.reversed
+    n = args.numEntries
+    case_id = args.caseID
+    item_id = args.itemID
+
+    blocks = bchain.read_blocks()
+    blocks.pop(0)
+    if is_reversed: blocks = reversed(blocks)
+    if case_id is not None:
+        blocks = filter(lambda block: block["case_id"] == case_id, blocks)
+    if item_id is not None:
+        blocks = filter(lambda block: block["item_id"] == item_id, blocks)
+    print_blocks(blocks if n is None else blocks[:n])
 
 
 def doRemove(args: argparse.Namespace):
