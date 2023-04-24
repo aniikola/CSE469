@@ -180,12 +180,16 @@ class Blockchain:
 
 
     def verify_valid(self):
-        try:
-            blocks = self.read_blocks()
-        except Exception:
-            return False
-
-        return True
+        with open(self.BCH_PATH, "rb") as file:
+            while True:
+                block_binary = file.read(self.BLOCK_LENGTH)
+                if not block_binary:
+                    return True
+                if len(block_binary) != 76:
+                    return False
+                block = list(struct.unpack(self.BLOCK_FORMAT, block_binary))
+                data_len = block[5]
+                data = file.read(data_len)
         
 
 
