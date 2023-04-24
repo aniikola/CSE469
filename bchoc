@@ -170,7 +170,16 @@ def doVerify(args: argparse.Namespace):
     doInit(args)
     bchain = Blockchain()
 
-    # TODO: Check for the invalid blocks.
+    if bchain.verify_valid():
+        print("Verified validity of blocks.")
+    else:
+        print("One or more blocks are invalid.")
+        exit(-1)
+    if bchain.verify_duplicate_parents():
+        print("Verified linear structure.")
+    else:
+        print("Multiple blocks have the same parent.")
+        exit(-1)
     if bchain.verify_checksums():
         print("Verified checksums.")
     else:
