@@ -154,7 +154,7 @@ class Blockchain:
                 return block
         return None
     
-    def verify_chain(self):
+    def verify_checksums(self):
         """
         Performs verification based on the required errors.
         :return: An integer containing the number of transactions, a string that can be one of the following values:
@@ -163,15 +163,10 @@ class Blockchain:
         """
         with open(self.BCH_PATH, "rb") as file:
             previous_hash = None
-            transaction_number = 0
-            parent_dict = {}
-            removed_items = []
-            err = None
             while True:
                 block_binary = file.read(self.BLOCK_LENGTH)
                 if not block_binary:
-                    return transaction_number, err
-                transaction_number += 1
+                    return True
                 block = list(struct.unpack(self.BLOCK_FORMAT, block_binary))
                 parent_hash = block[0].hex()
                 data_len = block[5]
@@ -179,19 +174,7 @@ class Blockchain:
                 # Check for parent
                 current_hash = hashlib.sha256(block_binary + data).hexdigest()
                 if previous_hash is not None and parent_hash != previous_hash:
-                    err = "NO PARENT", current_hash
-                # Check for linear structure
-                if parent_hash in parent_dict:
-                    err = "DUPLICATE PARENT", parent_dict[parent_hash], current_hash
-                else:
-                    parent_dict[parent_hash] = current_hash
-                # Check for item traversal
-                item_id = block[3]
-                state = block[4].decode().rstrip("\x00")
-                if state in {State.DISPOSED.value, State.RELEASED.value, State.DESTROYED.value}:
-                    removed_items.append(item_id)
-                elif (state in {State.CHECKED_IN.value, State.CHECKED_OUT.value}) and item_id in removed_items:
-                    err = "IMPROPER REMOVAL", current_hash
+                    return False
                 previous_hash = current_hash
 
     def verify_remove_is_final(self):
@@ -206,7 +189,7 @@ class Blockchain:
             if block['item_id'] in removed:
                 return False
 
-            if block['status'] == "DISPOSED" or block['status'] == "DESTROYED" or block['status'] == "RELEASED":
+            if block['state'] == "DISPOSED" or block['state'] == "DESTROYED" or block['state'] == "RELEASED":
                 removed.append(block['item_id'])
 
         return True
@@ -225,7 +208,7 @@ class Blockchain:
 
         for block in blocks:
             if block['item_id'] not in items:
-                if block['status'] != "CHECKEDIN":
+                if block['state'] != "CHECKEDIN":
                     return False
                 else:
                     items.append(block['item_id'])
@@ -240,7 +223,7 @@ class Blockchain:
         blocks = self.read_blocks()
 
         for block in blocks:
-            if block['status'] == "RELEASED" and block['data_length'] <= 0:
+            if block['state'] == "RELEASED" and block['data_length'] <= 0:
                 return False
 
         return True
@@ -255,7 +238,7 @@ class Blockchain:
         states = ["INITIAL", "CHECKEDIN", "CHECKEDOUT", "DISPOSED", "DESTROYED", "RELEASED"]
 
         for block in blocks:
-            status = block['status']
+            status = block['state']
             if status not in states:
                 return False
 
@@ -272,7 +255,7 @@ class Blockchain:
         checked_out = []
 
         for block in blocks:
-            status = block['status']
+            status = block['state']
             item_id = block['item_id']
             if status == "CHECKEDIN" and item_id in checked_in:
                 return False

@@ -161,14 +161,47 @@ def doInit(args: argparse.Namespace):
     bchain = Blockchain()
 
     if bchain.check_init():
-        print("Blockchain found with a valid initial file.")
+        print("Verified the initial block.")
     else:
         print("The blockchain file provided is invalid.")
         exit(-1)
 
 def doVerify(args: argparse.Namespace):
-    pass
+    doInit(args)
+    bchain = Blockchain()
 
+    # TODO: Check for the invalid blocks.
+    if bchain.verify_checksums():
+        print("Verified checksums.")
+    else:
+        print("The blockchain contains a block with incorrect checksum.")
+        exit(-1)
+    if bchain.verify_status_good():
+        print("Verified status values.")
+    else:
+        print("Invalid status value in one of the blocks.")
+        exit(-1)
+    if bchain.verify_releases_are_good():
+        print("Verified the integrity of release blocks.")
+    else:
+        print("A release operation done improperly.")
+        exit(-1)
+    if bchain.verify_add_is_first():
+        print("Verified the correct use of add method.")
+    else:
+        print("Operations ran on items before their addition.")
+        exit(-1)
+    if bchain.verify_remove_is_final():
+        print("Verified the correct use of remove method.")
+    else:
+        print("Operations ran on items after their removal.")
+        exit(-1)
+    if bchain.verify_check_order():
+        print("Verified the correct order of checkins and checkouts.")
+    else:
+        print("An item checked or checked out while in an improper state.")
+        exit(-1)
+    print("BLOCKCHAIN VERIFICATION FINISHED")
 
 def loadChainFromFile(filePath):
     pass
