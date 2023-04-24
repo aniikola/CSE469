@@ -154,69 +154,29 @@ class Blockchain:
                 return block
         return None
     
-    # def verify_chain(self):
-    #     """
-    #     Performs verification based on the required errors.
-    #     :return: An integer containing the number of transactions, a string that can be one of the following values:
-    #     "NO PARENT", "DUPLICATE PARENT" or "IMPROPER REMOVAL", and a hash of one (or two in case of "DUPLICATE PARENT")
-    #     blocks involved in error.
-    #     """
-    #     with open(self.BCH_PATH, "rb") as file:
-    #         previous_hash = None
-    #         transaction_number = 0
-    #         parent_dict = {}
-    #         removed_items = []
-    #         err = None
-    #         while True:
-    #             block_binary = file.read(self.BLOCK_LENGTH)
-    #             if not block_binary:
-    #                 return transaction_number, err
-    #             transaction_number += 1
-    #             block = list(struct.unpack(self.BLOCK_FORMAT, block_binary))
-    #             parent_hash = block[0].hex()
-    #             data_len = block[5]
-    #             data = file.read(data_len)
-    #             # Check for parent
-    #             current_hash = hashlib.sha256(block_binary + data).hexdigest()
-    #             if previous_hash is not None and parent_hash != previous_hash:
-    #                 err = "NO PARENT", current_hash
-    #             # Check for linear structure
-    #             if parent_hash in parent_dict:
-    #                 err = "DUPLICATE PARENT", parent_dict[parent_hash], current_hash
-    #             else:
-    #                 parent_dict[parent_hash] = current_hash
-    #             # Check for item traversal
-    #             item_id = block[3]
-    #             state = block[4].decode().rstrip("\x00")
-    #             if state in {State.DISPOSED.value, State.RELEASED.value, State.DESTROYED.value}:
-    #                 removed_items.append(item_id)
-    #             elif (state in {State.CHECKED_IN.value, State.CHECKED_OUT.value}) and item_id in removed_items:
-    #                 err = "IMPROPER REMOVAL", current_hash
-    #             previous_hash = current_hash
 
-
-    def verify_chain(self):
-        if not self.verify_valid():
-            print("Error: block is not valid")
-            exit(-1)
-        if not self.verify_remove_is_final():
-            print("Error: item changed after removal")
-            exit(-1)
-        if not self.verify_add_is_first():
-            print("Error: item changed before it is added")
-            exit(-1)
-        if not self.verify_releases_are_good():
-            print("Error: item released without valid owner")
-            exit(-1)
-        if not self.verify_status_good():
-            print("Error: item removed without valid reason")
-            exit(-1)
-        if not self.verify_check_order():
-            print("Error: item checked in or checked out out of order")
-            exit(-1)
-        if not self.verify_duplicate_parents():
-            print("Error: item has duplicate parents")
-            exit(-1)
+    def verify_checksums(self):
+        """
+        Performs verification based on the required errors.
+        :return: An integer containing the number of transactions, a string that can be one of the following values:
+        "NO PARENT", "DUPLICATE PARENT" or "IMPROPER REMOVAL", and a hash of one (or two in case of "DUPLICATE PARENT")
+        blocks involved in error.
+        """
+        with open(self.BCH_PATH, "rb") as file:
+            previous_hash = None
+            while True:
+                block_binary = file.read(self.BLOCK_LENGTH)
+                if not block_binary:
+                    return True
+                block = list(struct.unpack(self.BLOCK_FORMAT, block_binary))
+                parent_hash = block[0].hex()
+                data_len = block[5]
+                data = file.read(data_len)
+                # Check for parent
+                current_hash = hashlib.sha256(block_binary + data).hexdigest()
+                if previous_hash is not None and parent_hash != previous_hash:
+                    return False
+                previous_hash = current_hash
 
 
     def verify_valid(self):
@@ -227,6 +187,7 @@ class Blockchain:
 
         return True
         
+
 
     def verify_remove_is_final(self):
         """
@@ -239,6 +200,7 @@ class Blockchain:
         for block in blocks:
             if block['item_id'] in removed:
                 return False
+
 
             state = block['state']
             if state == "DISPOSED" or state == "DESTROYED" or state == "RELEASED":
