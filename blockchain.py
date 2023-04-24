@@ -154,6 +154,7 @@ class Blockchain:
                 return block
         return None
     
+
     def verify_checksums(self):
         """
         Performs verification based on the required errors.
@@ -177,6 +178,17 @@ class Blockchain:
                     return False
                 previous_hash = current_hash
 
+
+    def verify_valid(self):
+        try:
+            blocks = self.read_blocks()
+        except Exception:
+            return False
+
+        return True
+        
+
+
     def verify_remove_is_final(self):
         """
         Loops through the entire blockchain, keeping track of all items that have been removed. If an item that has been removed appears again, return False.
@@ -189,7 +201,9 @@ class Blockchain:
             if block['item_id'] in removed:
                 return False
 
-            if block['state'] == "DISPOSED" or block['state'] == "DESTROYED" or block['state'] == "RELEASED":
+
+            state = block['state']
+            if state == "DISPOSED" or state == "DESTROYED" or state == "RELEASED":
                 removed.append(block['item_id'])
 
         return True
@@ -274,6 +288,23 @@ class Blockchain:
         return True
 
 
+    def verify_duplicate_parents(self):
+        """
+        Returns false if multiple blocks have identical parents.
+        """
+        blocks = self.read_blocks()
+
+        parents = []
+
+        for block in blocks:
+            parent = block['previous_block']
+            
+            if parent in parents:
+                return False
+            else:
+                parents.append(block['previous_block'])
+
+        return True
 
 
 
