@@ -318,7 +318,7 @@ class Blockchain:
         """
         if not os.path.isfile(self.BCH_PATH):
             self.__write_initial_block()
-        elif self.check_init():
+        elif self.check_init() and self.verify_valid():
             self.last_hash = self.__get_last_hash()
 
 # A simple main method that creates a chain with one item and performs some basic operations on it.
