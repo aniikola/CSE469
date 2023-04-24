@@ -135,7 +135,7 @@ def doRemove(args: argparse.Namespace):
     # Remove evidence
     case = block['case_id']
     if reason == "RELEASED":
-        bchain.write_block(case, id, "RELEASED", owner)
+        bchain.write_block(case, id, "RELEASED", owner + "\x00")
 
         print("Case: {}".format(case))
         print("Released item: {}".format(id))
