@@ -264,6 +264,38 @@ class Blockchain:
         return True
 
 
+    def verify_check_order(self):
+        """
+        Loops through the entire blockchain. Checks if any item is checked out twice with no checkouts inbetween, and if any item is checked out twice iwth no checkins inbetween. Returns false if so.
+        """
+        blocks = self.read_blocks()
+
+        checked_in = []
+        checked_out = []
+
+        for block in blocks:
+            status = block['status']
+            item_id = block['item_id']
+            if status == "CHECKEDIN" and item_id in checked_in:
+                return False
+            elif status == "CHECKEDIN" and item_id not in checked_in:
+                checked_in.append(item_id)
+            elif status == "CHECKEDOUT" and item_id in checked_in:
+                checked_in.remove(item_id)
+
+            if status == "CHECKEDOUT" and item_id in checked_out:
+                return False
+            elif status == "CHECKEDOUT" and item_id not in checked_out:
+                checked_out.append(item_id)
+            elif status == "CHECKEDIN" and item_id in checked_out:
+                checked_out.remove(item_id)
+
+        return True
+
+
+
+
+
     def __init__(self):
         """
         Creates the INITIAL block and updates the last hash.
