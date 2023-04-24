@@ -53,7 +53,7 @@ def doCheckout(args: argparse.Namespace):
 
     # Checkout item
     case = block['case_id']
-    bchain.write_block(case, id, "CHECKOUT", "")
+    bchain.write_block(case, id, "CHECKEDOUT", "")
 
     print("Case: {}".format(case))
     print("Checked out item: {}".format(id))

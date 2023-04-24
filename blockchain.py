@@ -20,12 +20,12 @@ class Blockchain:
 
     BLOCK_FORMAT = "=32sd16sI12sI"
     BLOCK_LENGTH = 76
-    LE = sys.byteorder != "little"
+    BYTE_ORDER = sys.byteorder
 
     if "BCHOC_FILE_PATH" in os.environ:
         BCH_PATH = os.environ.get("BCHOC_FILE_PATH")
     else:
-        BCH_PATH = "/home/nicholas/Repos/CSE469/chain.dat"
+        BCH_PATH = "C:\Projects\CSE469 Project\CSE469\chain.dat"
 
     def __get_last_hash(self):
         """
@@ -77,7 +77,7 @@ class Blockchain:
     
     def write_block(
             self,
-            case_id: str,
+            case_id: UUID,
             item_id: int,
             state: str,
             data: str
@@ -92,10 +92,7 @@ class Blockchain:
         """
         previous_block = self.last_hash
         timestamp = datetime.now(timezone.utc).timestamp()
-        if self.LE:
-            case_id = case_id.bytes_le
-        else:
-            case_id = case_id.bytes
+        case_id = case_id.int.to_bytes(16, byteorder=self.BYTE_ORDER)
         state = state.ljust(12, "\x00").encode()
         data_length = len(data)
         data = data.encode()
@@ -139,7 +136,8 @@ class Blockchain:
                     block = {
                         "previous_block": l[0].hex(),
                         "timestamp": datetime.fromtimestamp(l[1]),
-                        "case_id": UUID(bytes_le=l[2]) if self.LE else UUID(bytes=l[2]),
+                        # "case_id": UUID(bytes_le=l[2]) if self.LE else UUID(bytes=l[2]),
+                        "case_id": UUID(int=int.from_bytes(l[2], byteorder=self.BYTE_ORDER)),
                         "item_id": l[3],
                         "state": state,
                         "data_length": l[5]
