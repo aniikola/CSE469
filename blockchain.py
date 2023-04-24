@@ -216,7 +216,7 @@ class Blockchain:
 
     def verify_add_is_first(self):
         """
-        Loops through the entire blockchain, checking every new item. If every new item has the status 'CHECKEDIN', then continue. If a new item has any other status, return False.
+        Loops through the entire blockchain, checking every new item. If a new item has the status 'CHECKEDIN', then continue. If a new item has any other status, return False.
         Once the end of the chain has been reached with no returns, return True.
         """
         blocks = self.read_blocks()
@@ -227,12 +227,42 @@ class Blockchain:
 
         for block in blocks:
             if block['item_id'] not in items:
-                if block['status'] is not 'CHECKEDIN':
+                if block['status'] is not "CHECKEDIN":
                     return False
                 else:
                     items.append(block['item_id'])
 
         return True
+
+
+    def verify_releases_are_good(self):
+        """
+        Loops through the entire blockchain. Checks every item that is released to see if they have a valid reason (data_length > 0). Return false if an item is released without a reason.
+        """
+        blocks = self.read_blocks()
+
+        for block in blocks:
+            if block['status'] == "RELEASED" and block['data_length'] <= 0:
+                return False
+
+        return True
+
+
+    def verify_status_good(self):
+        """
+        Loops through the entire blockchain. Checks every item to see if their status is valid (is in the State enum). Returns false is an invalid status is found.
+        """
+        blocks = self.read_blocks()
+    
+        states = ["INITIAL", "CHECKEDIN", "CHECKEDOUT", "DISPOSED", "DESTROYED", "RELEASED"]
+
+        for block in blocks:
+            status = block['status']
+            if status not in states:
+                return False
+
+        return True
+
 
     def __init__(self):
         """
