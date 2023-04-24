@@ -115,8 +115,13 @@ def doLog(args: argparse.Namespace):
     item_id = args.itemID
 
     blocks = bchain.read_blocks()
-    if case_id or item_id:
-        blocks.pop(0)
+    if not case_id and not item_id:
+        print("Case: 00000000-0000-0000-0000-000000000000")
+        print("Item: 0")
+        print(f"Action: {blocks[0]['state']}")
+        print(f"Time: {blocks[0]['timestamp'].isoformat()}")
+        print()
+    blocks.pop(0)
     if is_reversed: blocks = reversed(blocks)
     if case_id is not None:
         blocks = filter(lambda block: str(block["case_id"]) == case_id, blocks)
