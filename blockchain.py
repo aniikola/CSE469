@@ -46,8 +46,8 @@ class Blockchain:
         Writes the initial block when the new file is created.
         """
         previous_block = bytearray([0] * 32)
-        # timestamp = datetime.now(timezone.utc).timestamp()
-        timestamp = 0
+        timestamp = datetime.now(timezone.utc).timestamp()
+        # timestamp = 0
         case_id = bytearray([0] * 16)
         item_id = 0
         # state = "{:<12}".format(State.INITIAL.value).encode()
