@@ -128,7 +128,7 @@ def doRemove(args: argparse.Namespace):
     elif reason == "DESTROYED" and owner != None:
         print("Error: Destroyed evidence does not need an owner.")
         exit(-1)
-    else:
+    elif reason != "RELEASED" and reason != "DISPOSED" and reason != "DESTROYED":
         print("Error: Not a valid reason to remove an item.")
         exit(-1)
 
@@ -191,13 +191,13 @@ def main() -> None:
 
     modeParsers["checkin"].add_argument("-i", "--item_id", dest="itemID", type=int, required=True)
 
-    modeParsers["log"].add_argument("-r", "--reversed", dest="reversed", action="store_true")
+    modeParsers["log"].add_argument("-r", "--reverse", dest="reversed", action="store_true")
     modeParsers["log"].add_argument("-n", "--num_entries", dest="numEntries", type=int)
     modeParsers["log"].add_argument("-c", "--case_id", dest="caseID", type=str)
     modeParsers["log"].add_argument("-i", "--item_id", dest="itemID", type=int)
     
     modeParsers["remove"].add_argument("-i", "--item_id", dest="itemID", type=int, required=True)
-    modeParsers["remove"].add_argument("-y", "--reason", dest="reason", type=str, required=True)
+    modeParsers["remove"].add_argument("-y", "--why", dest="reason", type=str, required=True)
     modeParsers["remove"].add_argument("-o", "--owner", dest="owner", type=str)
 
     args: argparse.Namespace = argumentParser.parse_args()

@@ -227,7 +227,7 @@ class Blockchain:
 
         for block in blocks:
             if block['item_id'] not in items:
-                if block['status'] is not "CHECKEDIN":
+                if block['status'] != "CHECKEDIN":
                     return False
                 else:
                     items.append(block['item_id'])
