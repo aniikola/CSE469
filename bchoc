@@ -99,8 +99,12 @@ def doCheckin(args: argparse.Namespace):
 
 def print_blocks(blocks):
     for block in blocks:
-        print(f"Case: {block['case_id']}")
-        print(f"Item: {block['item_id']}")
+        if block["state"] == "INITIAL":
+            print("Case: 00000000-0000-0000-0000-000000000000")
+            print("Item: 0")
+        else:
+            print(f"Case: {block['case_id']}")
+            print(f"Item: {block['item_id']}")
         print(f"Action: {block['state']}")
         print(f"Time: {block['timestamp'].isoformat()}")
         print()
@@ -115,13 +119,6 @@ def doLog(args: argparse.Namespace):
     item_id = args.itemID
 
     blocks = bchain.read_blocks()
-    if not case_id and not item_id:
-        print("Case: 00000000-0000-0000-0000-000000000000")
-        print("Item: 0")
-        print(f"Action: {blocks[0]['state']}")
-        print(f"Time: {blocks[0]['timestamp'].isoformat()}")
-        print()
-    blocks.pop(0)
     if is_reversed: blocks = reversed(blocks)
     if case_id is not None:
         blocks = filter(lambda block: str(block["case_id"]) == case_id, blocks)
