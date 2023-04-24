@@ -115,11 +115,13 @@ def doLog(args: argparse.Namespace):
     item_id = args.itemID
 
     blocks = bchain.read_blocks()
+    if case_id or item_id:
+        blocks.pop(0)
     if is_reversed: blocks = reversed(blocks)
     if case_id is not None:
-        blocks = filter(lambda block: block["case_id"] != case_id, blocks)
+        blocks = filter(lambda block: str(block["case_id"]) == case_id, blocks)
     if item_id is not None:
-        blocks = filter(lambda block: block["item_id"] != item_id, blocks)
+        blocks = filter(lambda block: block["item_id"] == item_id, blocks)
     print_blocks(blocks if n is None else blocks[:n])
 
 
