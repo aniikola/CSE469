@@ -102,7 +102,7 @@ def print_blocks(blocks):
         print(f"Case: {block['case_id']}")
         print(f"Item: {block['item_id']}")
         print(f"Action: {block['state']}")
-        print(f"Time: {block['timestamp']}")
+        print(f"Time: {block['timestamp'].isoformat()}")
         print()
 
 
