@@ -103,6 +103,7 @@ def print_blocks(blocks):
         print(f"Item: {block['item_id']}")
         print(f"Action: {block['state']}")
         print(f"Time: {block['timestamp']}")
+        print()
 
 
 def doLog(args: argparse.Namespace):
