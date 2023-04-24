@@ -137,7 +137,7 @@ class Blockchain:
                         "previous_block": l[0].hex(),
                         "timestamp": datetime.fromtimestamp(l[1]),
                         # "case_id": UUID(bytes_le=l[2]) if self.LE else UUID(bytes=l[2]),
-                        "case_id": UUID(int=l[2]),
+                        "case_id": UUID(int=int.from_bytes(l[2], byteorder=self.BYTE_ORDER)),
                         "item_id": l[3],
                         "state": state,
                         "data_length": l[5]
