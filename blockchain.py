@@ -20,7 +20,7 @@ class Blockchain:
 
     BLOCK_FORMAT = "=32sd16sI12sI"
     BLOCK_LENGTH = 76
-    LE = sys.byteorder == "little"
+    BYTE_ORDER = sys.byteorder
 
     if "BCHOC_FILE_PATH" in os.environ:
         BCH_PATH = os.environ.get("BCHOC_FILE_PATH")
@@ -92,7 +92,7 @@ class Blockchain:
         """
         previous_block = self.last_hash
         timestamp = datetime.now(timezone.utc).timestamp()
-        case_id = case_id.int.to_bytes(16)
+        case_id = case_id.int.to_bytes(16, byteorder=self.BYTE_ORDER)
         state = state.ljust(12, "\x00").encode()
         data_length = len(data)
         data = data.encode()
