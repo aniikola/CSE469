@@ -180,12 +180,16 @@ class Blockchain:
 
 
     def verify_valid(self):
-        try:
-            blocks = self.read_blocks()
-        except Exception:
-            return False
-
-        return True
+        with open(self.BCH_PATH, "rb") as file:
+            while True:
+                block_binary = file.read(self.BLOCK_LENGTH)
+                if not block_binary:
+                    return True
+                if len(block_binary) != 76:
+                    return False
+                block = list(struct.unpack(self.BLOCK_FORMAT, block_binary))
+                data_len = block[5]
+                data = file.read(data_len)
         
 
 
@@ -314,7 +318,7 @@ class Blockchain:
         """
         if not os.path.isfile(self.BCH_PATH):
             self.__write_initial_block()
-        elif self.check_init():
+        elif self.check_init() and self.verify_valid():
             self.last_hash = self.__get_last_hash()
 
 # A simple main method that creates a chain with one item and performs some basic operations on it.
