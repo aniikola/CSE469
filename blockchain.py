@@ -230,7 +230,8 @@ class Blockchain:
             if block['item_id'] in removed:
                 return False
 
-            if block['status'] == "DISPOSED" or block['status'] == "DESTROYED" or block['status'] == "RELEASED":
+            state = block['state']
+            if state == "DISPOSED" or state == "DESTROYED" or state == "RELEASED":
                 removed.append(block['item_id'])
 
         return True
@@ -249,7 +250,7 @@ class Blockchain:
 
         for block in blocks:
             if block['item_id'] not in items:
-                if block['status'] != "CHECKEDIN":
+                if block['state'] != "CHECKEDIN":
                     return False
                 else:
                     items.append(block['item_id'])
@@ -264,7 +265,7 @@ class Blockchain:
         blocks = self.read_blocks()
 
         for block in blocks:
-            if block['status'] == "RELEASED" and block['data_length'] <= 0:
+            if block['state'] == "RELEASED" and block['data_length'] <= 0:
                 return False
 
         return True
@@ -279,7 +280,7 @@ class Blockchain:
         states = ["INITIAL", "CHECKEDIN", "CHECKEDOUT", "DISPOSED", "DESTROYED", "RELEASED"]
 
         for block in blocks:
-            status = block['status']
+            status = block['state']
             if status not in states:
                 return False
 
@@ -296,7 +297,7 @@ class Blockchain:
         checked_out = []
 
         for block in blocks:
-            status = block['status']
+            status = block['state']
             item_id = block['item_id']
             if status == "CHECKEDIN" and item_id in checked_in:
                 return False
